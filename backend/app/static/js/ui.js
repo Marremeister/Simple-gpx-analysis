@@ -1,10 +1,14 @@
 import { formatDateTimeLocal } from "./utils.js";
 
+const MS_TO_KNOTS = 1.94384;
+
 export class UIController {
   constructor(apiClient, state, mapView) {
     this.api = apiClient;
     this.state = state;
     this.mapView = mapView;
+    this.raceStartTime = null;
+    this.raceEndTime = null;
   }
 
   async initialize() {
@@ -25,6 +29,9 @@ export class UIController {
     this.boatList = document.getElementById("boat-list");
     this.windowStart = document.getElementById("window-start");
     this.windowEnd = document.getElementById("window-end");
+    this.timeSliderStart = document.getElementById("time-slider-start");
+    this.timeSliderEnd = document.getElementById("time-slider-end");
+    this.sliderLabel = document.getElementById("slider-label");
     this.refreshButton = document.getElementById("refresh-stats");
     this.downloadButton = document.getElementById("download-csv");
     this.statsTableBody = document.querySelector("#stats-table tbody");
@@ -89,6 +96,14 @@ export class UIController {
       } catch (error) {
         this.setUploadStatus(`Upload failed: ${error.message}`);
       }
+    });
+
+    this.timeSliderStart.addEventListener("input", () => {
+      this.updateWindowFromSliders();
+    });
+
+    this.timeSliderEnd.addEventListener("input", () => {
+      this.updateWindowFromSliders();
     });
 
     this.refreshButton.addEventListener("click", () => {
@@ -185,6 +200,44 @@ export class UIController {
     });
   }
 
+  prefillWindow(raceId) {
+    const race = this.state.getRaceById(raceId);
+    if (!race) return;
+    this.raceStartTime = new Date(race.start_time).getTime();
+    this.raceEndTime = this.raceStartTime + 60 * 60 * 1000; // 1 hour default
+
+    this.timeSliderStart.min = 0;
+    this.timeSliderStart.max = this.raceEndTime - this.raceStartTime;
+    this.timeSliderStart.value = 0;
+
+    this.timeSliderEnd.min = 0;
+    this.timeSliderEnd.max = this.raceEndTime - this.raceStartTime;
+    this.timeSliderEnd.value = Math.min(5 * 60 * 1000, this.raceEndTime - this.raceStartTime);
+
+    this.updateWindowFromSliders();
+  }
+
+  updateWindowFromSliders() {
+    if (!this.raceStartTime) return;
+    const startValue = parseInt(this.timeSliderStart.value, 10);
+    const endValue = parseInt(this.timeSliderEnd.value, 10);
+
+    // Ensure start is not after end
+    if (startValue >= endValue) {
+      this.timeSliderStart.value = Math.max(0, endValue - 60000);
+      return;
+    }
+
+    const windowStart = new Date(this.raceStartTime + startValue);
+    const windowEnd = new Date(this.raceStartTime + endValue);
+
+    this.windowStart.value = formatDateTimeLocal(windowStart.toISOString());
+    this.windowEnd.value = formatDateTimeLocal(windowEnd.toISOString());
+
+    const duration = Math.floor((endValue - startValue) / 1000);
+    this.sliderLabel.textContent = `Window: ${windowStart.toLocaleTimeString()} - ${windowEnd.toLocaleTimeString()} (${duration}s)`;
+  }
+
   getWindowRange() {
     const start = this.windowStart.value;
     const end = this.windowEnd.value;
@@ -239,8 +292,8 @@ export class UIController {
       const boat = this.state.getBoatById(stat.boat_id);
       const cells = [
         boat?.sail_no || stat.boat_id,
-        stat.avg_sog.toFixed(2),
-        stat.avg_vmg.toFixed(2),
+        (stat.avg_sog * MS_TO_KNOTS).toFixed(2),
+        (stat.avg_vmg * MS_TO_KNOTS).toFixed(2),
         stat.avg_heading.toFixed(1),
         stat.heading_std.toFixed(1),
         stat.distance_sailed.toFixed(0),
@@ -291,14 +344,6 @@ export class UIController {
     const now = new Date();
     this.windowStart.value = formatDateTimeLocal(now.toISOString());
     this.windowEnd.value = formatDateTimeLocal(new Date(now.getTime() + 10 * 60 * 1000).toISOString());
-  }
-
-  prefillWindow(raceId) {
-    const race = this.state.getRaceById(raceId);
-    if (!race) return;
-    const start = new Date(race.start_time);
-    this.windowStart.value = formatDateTimeLocal(start.toISOString());
-    this.windowEnd.value = formatDateTimeLocal(new Date(start.getTime() + 5 * 60 * 1000).toISOString());
   }
 
   setUploadStatus(text) {

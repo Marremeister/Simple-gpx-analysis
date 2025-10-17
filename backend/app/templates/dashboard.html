@@ -52,14 +52,24 @@
     <div id="map"></div>
     <section class="controls">
       <div class="time-range">
-        <label>
-          Window start
-          <input type="datetime-local" id="window-start" />
-        </label>
-        <label>
-          Window end
-          <input type="datetime-local" id="window-end" />
-        </label>
+        <div style="flex: 1;">
+          <label>
+            Time window (drag both sliders)
+            <div style="display: flex; gap: 1rem; align-items: center;">
+              <div style="flex: 1;">
+                <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">Start</div>
+                <input type="range" id="time-slider-start" min="0" max="3600" value="0" />
+              </div>
+              <div style="flex: 1;">
+                <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">End</div>
+                <input type="range" id="time-slider-end" min="0" max="3600" value="300" />
+              </div>
+            </div>
+            <div id="slider-label" style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;"></div>
+          </label>
+        </div>
+        <input type="datetime-local" id="window-start" style="display: none;" />
+        <input type="datetime-local" id="window-end" style="display: none;" />
         <button id="refresh-stats">Refresh stats</button>
       </div>
       <div class="export-buttons">
@@ -72,8 +82,8 @@
         <thead>
           <tr>
             <th>Boat</th>
-            <th>Avg SOG (m/s)</th>
-            <th>Avg VMG (m/s)</th>
+            <th>Avg SOG (kt)</th>
+            <th>Avg VMG (kt)</th>
             <th>Avg Heading (°)</th>
             <th>σ Heading (°)</th>
             <th>Distance (m)</th>
