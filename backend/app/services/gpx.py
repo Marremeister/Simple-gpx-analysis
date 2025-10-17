@@ -45,7 +45,7 @@ class GPXService:
         events: list[models.Event] = []
         heading = df["cog_deg"].values
         sog = df["sog_mps"].values
-        times = pd.to_datetime(df["time"]).to_pydatetime()
+        times = pd.to_datetime(df["time"]).dt.to_pydatetime()
 
         window = 10
         for idx in range(window, len(df) - window):
@@ -98,10 +98,10 @@ class GPXService:
         df = df.sort_values("time").set_index("time")
         df["sog"] = pd.to_numeric(df["sog"], errors="coerce")
 
-        resampled = df.resample("1S").interpolate(method="time")
-        resampled["src_rate_hz"] = 1.0
+        resampled = df.resample("1s").interpolate(method="index")
         resampled.reset_index(inplace=True)
-        resampled.rename(columns={"index": "time"}, inplace=True)
+
+        resampled["src_rate_hz"] = 1.0
 
         lats = np.deg2rad(resampled["lat"].values)
         lons = np.deg2rad(resampled["lon"].values)
@@ -120,15 +120,15 @@ class GPXService:
         dt = dt.astype(float)
         dt[dt == 0] = 1.0
 
-        sog = np.append(distances / dt, np.nan)
-        cog = np.append((fwd_azimuth + 360.0) % 360.0, np.nan)
+        sog_computed = np.append(distances / dt, np.nan)
+        cog_raw = np.append((fwd_azimuth + 360.0) % 360.0, np.nan)
 
-        resampled.loc[:-2, "sog_computed"] = sog[:-1]
-        resampled.loc[:-2, "cog_raw"] = cog[:-1]
+        resampled["sog_computed"] = sog_computed
+        resampled["cog_raw"] = cog_raw
 
         resampled["sog_mps"] = resampled["sog"].fillna(resampled["sog_computed"])
         resampled["cog_deg"] = (
-            pd.Series(resampled["cog_raw"]).interpolate().fillna(method="bfill").fillna(method="ffill")
+            pd.Series(resampled["cog_raw"]).interpolate().bfill().ffill()
         )
         resampled["cog_deg"] = resampled["cog_deg"].rolling(window=5, center=True, min_periods=1).median()
 

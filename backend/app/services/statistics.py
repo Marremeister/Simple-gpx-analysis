@@ -56,8 +56,8 @@ class StatisticsService:
 
         ref_dir = self._resolve_reference_direction(boat, df, ref, leg_mark_id)
 
-        sog = df["sog_mps"].fillna(method="ffill").fillna(method="bfill").to_numpy()
-        heading = df["cog_deg"].fillna(method="ffill").fillna(method="bfill")
+        sog = df["sog_mps"].ffill().bfill().to_numpy()
+        heading = df["cog_deg"].ffill().bfill()
         vmg = self._vmg(sog, heading.to_numpy(), ref_dir)
 
         avg_heading, heading_std = self._heading_stats(heading)
