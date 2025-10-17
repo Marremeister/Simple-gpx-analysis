@@ -1,0 +1,31 @@
+:root {
+  color-scheme: light;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background-color: #f6f6f8;
+  color: #1c1c22;
+}
+
+body {
+  margin: 0;
+  background-color: var(--page-background, #f6f6f8);
+}
+
+header {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #023e8a, #0096c7);
+  color: white;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+header .subtitle {
+  margin: 0.25rem 0 0;
+  opacity: 0.85;
+}
+
+button {
+  font-family: inherit;
+}

@@ -1,9 +1,8 @@
-"""Utility CRUD functions to keep routers compact."""
+"""Data access helpers for the SQLAlchemy models."""
 from __future__ import annotations
 
-from collections.abc import Iterable
 from datetime import datetime
-from typing import Sequence
+from typing import Iterable, Sequence
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
@@ -74,7 +73,11 @@ def list_points(session: Session, boat_id: int, t0: datetime | None, t1: datetim
 
 
 def list_events(
-    session: Session, boat_ids: Iterable[int], t0: datetime | None = None, t1: datetime | None = None, event_type: models.EventType | None = None
+    session: Session,
+    boat_ids: Iterable[int],
+    t0: datetime | None = None,
+    t1: datetime | None = None,
+    event_type: models.EventType | None = None,
 ) -> list[models.Event]:
     stmt = select(models.Event).where(models.Event.boat_id.in_(list(boat_ids)))
     if t0 is not None:
