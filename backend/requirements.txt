@@ -1,0 +1,10 @@
+flask==3.0.2
+flask-cors==4.0.0
+sqlalchemy==2.0.25
+alembic==1.13.1
+gpxpy==1.6.2
+numpy==1.26.4
+pandas==2.2.0
+pyproj==3.6.1
+python-multipart==0.0.9
+shapely==2.0.3

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<header>
+  <h1>49er GPX Race Analyzer</h1>
+  <p class="subtitle">Upload GPX files, align boats, and inspect performance windows.</p>
+</header>
+<main>
+  <aside class="sidebar">
+    <section>
+      <h2>Race</h2>
+      <form id="race-form">
+        <label>
+          Name
+          <input type="text" name="name" required />
+        </label>
+        <label>
+          Start time
+          <input type="datetime-local" name="start_time" required />
+        </label>
+        <label>
+          TWD (°)
+          <input type="number" name="twd" step="1" />
+        </label>
+        <label>
+          TWS (kt)
+          <input type="number" name="tws" step="0.1" />
+        </label>
+        <button type="submit">Create race</button>
+      </form>
+      <div id="race-list"></div>
+    </section>
+    <section>
+      <h2>Upload GPX</h2>
+      <form id="upload-form">
+        <input type="file" id="gpx-files" name="files" accept=".gpx" multiple required />
+        <div class="inline">
+          <label>
+            Race
+            <select id="upload-race" required></select>
+          </label>
+        </div>
+        <button type="submit">Upload</button>
+      </form>
+      <div id="upload-status" class="status"></div>
+    </section>
+    <section>
+      <h2>Boats</h2>
+      <div id="boat-list"></div>
+    </section>
+  </aside>
+  <section class="content">
+    <div id="map"></div>
+    <section class="controls">
+      <div class="time-range">
+        <label>
+          Window start
+          <input type="datetime-local" id="window-start" />
+        </label>
+        <label>
+          Window end
+          <input type="datetime-local" id="window-end" />
+        </label>
+        <button id="refresh-stats">Refresh stats</button>
+      </div>
+      <div class="export-buttons">
+        <button id="download-csv">Download CSV</button>
+      </div>
+    </section>
+    <section>
+      <h2>Window stats</h2>
+      <table id="stats-table">
+        <thead>
+          <tr>
+            <th>Boat</th>
+            <th>Avg SOG (m/s)</th>
+            <th>Avg VMG (m/s)</th>
+            <th>Avg Heading (°)</th>
+            <th>σ Heading (°)</th>
+            <th>Distance (m)</th>
+            <th>Height gain (m)</th>
+            <th>Tacks</th>
+            <th>Gybes</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </section>
+</main>
+{% endblock %}
